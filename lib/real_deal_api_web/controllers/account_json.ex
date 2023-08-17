@@ -30,4 +30,14 @@ defmodule RealDealApiWeb.AccountJSON do
       token: token
     }
   end
+
+
+  # def showdat(%{account: account}) do
+  #   %{
+  #     id: account.id,
+  #     email: account.email,
+  #     user: render_one(account.user, UserJSON, :data)
+  #   }
+  # end
+
 end
