@@ -30,9 +30,15 @@ config :logger, :console,
 config :real_deal_api, RealDealApiWeb.Auth.Guardian,
     issuer: "real_deal_api",
     secret_key: "i4sKnSQ/6wsvQgKLn+r08lIXAuFE3VRXLWQkyFXFIidV++S+Abv+8b1LnCfRNsVO"
+
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :guardian, Guardian.DB,
+    repo: RealDealApi.Repo,
+    schema_name: "guardian_tokens",
+    sweep_interval: 60
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

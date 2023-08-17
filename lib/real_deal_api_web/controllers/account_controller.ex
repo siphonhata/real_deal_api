@@ -27,16 +27,16 @@ defmodule RealDealApiWeb.AccountController do
 
   def create(conn, %{"account" => account_params}) do
     with {:ok, %Account{} = account} <- Accounts.create_account(account_params),
-      {:ok, token, _claims} <- Guardian.encode_and_sign(account),
-      {:ok, %User{} = _user} <- Users.create_user(account, account_params) do
-      conn
-      |> put_status(:created)
-      #|> put_resp_header("location", ~p"/api/accounts/#{account}")
-      |> render(:showdata, %{account: account, token: token})
+          {:ok, %User{} = _user} <- Users.create_user(account, account_params) do
+      authorize_account(conn, account.email, account_params["hashed_password"])
     end
   end
 
   def sign_in(conn, %{"email" => email, "hashed_password" => hashed_password}) do
+    authorize_account(conn, email, hashed_password)
+  end
+
+  defp authorize_account(conn, email, hashed_password) do
     case Guardian.authenticate(email, hashed_password) do
       {:ok, account, token} ->
         conn
@@ -47,8 +47,27 @@ defmodule RealDealApiWeb.AccountController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    account = Accounts.get_account!(id)
+  def refresh_session(conn, %{}) do
+    token = Guardian.Plug.current_token(conn)
+    {:ok, account, new_token} = Guardian.authenticate(token)
+    conn
+    |> Plug.Conn.put_session(:account_id, account.id)
+    |> put_status(:ok)
+    |> render(:showdata, %{account: account, token: new_token})
+  end
+
+  def sign_out(conn, %{}) do
+    account = conn.assigns[:account]
+    token = Guardian.Plug.current_token(conn)
+    Guardian.revoke(token)
+    conn
+    |> Plug.Conn.clear_session()
+    |> put_status(:ok)
+    |> render(:showdata, %{account: account, token: nil})
+  end
+
+  def show(conn, %{"id" => _id}) do
+   # account = Accounts.get_account!(id)
     render(conn, :show, account: conn.assigns.account)
   end
 
