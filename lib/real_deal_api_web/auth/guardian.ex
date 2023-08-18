@@ -4,7 +4,6 @@ defmodule RealDealApiWeb.Auth.Guardian do
   alias RealDealApi.Accounts
 
   def subject_for_token(%{id: id}, _claims) do
-
     sub = to_string(id)
     {:ok, sub}
 
@@ -46,7 +45,7 @@ defmodule RealDealApiWeb.Auth.Guardian do
     end
   end
 
-  defp validate_password(password, hashed_password) do
+  def validate_password(password, hashed_password) do
     Bcrypt.verify_pass(password, hashed_password)
   end
 
